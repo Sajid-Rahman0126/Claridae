@@ -1,0 +1,22 @@
+skill: test-plan-generator
+judge: contains
+cases:
+  - name: login-feature
+    input: |
+      Feature: users log in with email + password. Account locks after 5 failed
+      attempts for 15 minutes. "Forgot password" sends a reset link valid for 1 hour.
+    expect:
+      contains: ["negative", "boundary", "lockout", "security", "P0"]
+
+  - name: coupon-checkout
+    input: |
+      Feature: checkout accepts one coupon code per order. Codes can be percentage
+      or fixed amount, may have expiry dates, and cannot reduce the total below $0.
+    expect:
+      contains: ["expired", "boundary", "$0", "negative"]
+
+  - name: ambiguous-feature
+    input: |
+      Feature: users can share reports.
+    expect:
+      contains: ["Open questions"]
