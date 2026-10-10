@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalshi Council</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span class="logo"></span>KALSHI COUNCIL <span id="mode" class="pill">PAPER</span>
+    <span id="status" class="status"><i></i><b>connecting</b></span></div>
+  <div class="balances" id="balances"></div>
+  <button id="pause" class="btn ghost">Pause trading</button>
+</header>
+
+<div class="layout">
+  <nav class="side">
+    <div class="navgroup">Crew</div>
+    <a data-tab="hub" class="active">Agent Hub</a>
+    <a data-tab="council">The Council</a>
+    <div class="navgroup">Automation</div>
+    <a data-tab="signals">Signals &amp; Debates</a>
+    <a data-tab="positions">Positions</a>
+    <a data-tab="backtest">Backtest</a>
+    <div class="navgroup">System</div>
+    <a data-tab="connect">Connect agents</a>
+  </nav>
+
+  <main>
+    <section class="stats">
+      <div class="card stat hero"><label>Session P&amp;L</label><b id="s-pnl">$0.00</b><small id="s-total"></small></div>
+      <div class="card stat"><label>Win rate</label><b id="s-win">—</b></div>
+      <div class="card stat"><label>Settled</label><b id="s-settled">0</b><small id="s-today"></small></div>
+      <div class="card stat"><label>Signals scanned</label><b id="s-signals">0</b></div>
+      <div class="card stat"><label>Open positions</label><b id="s-open">0</b><small id="s-risk"></small></div>
+    </section>
+
+    <section id="tab-hub" class="tab active">
+      <div class="card hubcard">
+        <div class="hubhead">
+          <div><h2>Agent Hub</h2><p class="muted">Each AI agent walks to the room of every real tool call it makes, beside the bot crew's signals, debates, orders and settlements. Click a crew member to see what it's thinking.</p></div>
+        </div>
+        <canvas id="ship"></canvas>
+      </div>
+      <div class="card">
+        <h3>Live feed</h3>
+        <ul id="feed" class="feed"></ul>
+      </div>
+    </section>
+
+    <section id="tab-council" class="tab">
+      <div class="grid2">
+        <div class="card">
+          <h2>The Council</h2>
+          <p class="muted">Agents post fair values; each votes YES, NO or PASS against the live book after fees. A trade needs a quorum holding a majority of skill-weighted votes.</p>
+          <div id="verdicts" class="verdicts"></div>
+        </div>
+        <div class="card">
+          <h2>Who called it</h2>
+          <p class="muted">Brier score against outcomes, compared with the market price at forecast time. Positive skill beats the price and earns voting weight.</p>
+          <table class="table" id="board"><thead><tr><th>Agent</th><th>Forecasts</th><th>Scored</th><th>Skill</th><th>Hit</th><th>Weight</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-signals" class="tab">
+      <div class="grid2">
+        <div class="card"><h2>Bot crew signals</h2><table class="table" id="signals"><thead><tr><th>Bot</th><th>Signal</th><th>Edge</th></tr></thead><tbody></tbody></table></div>
+        <div class="card"><h2>Six emotions debate</h2><p class="muted">Greed, Fear, FOMO, Doubt, Patience and Discipline argue every bot signal. Discipline can veto.</p><div id="debates"></div></div>
+      </div>
+    </section>
+
+    <section id="tab-positions" class="tab">
+      <div class="card"><h2>Open positions</h2><table class="table" id="open"><thead><tr><th>Market</th><th>Side</th><th>Qty</th><th>Avg</th><th>Cost</th><th>Bucket</th><th>From</th></tr></thead><tbody></tbody></table></div>
+      <div class="card"><h2>Settled</h2><table class="table" id="closed"><thead><tr><th>Market</th><th>Side</th><th>Qty</th><th>Price</th><th>Result</th><th>P&amp;L</th><th>From</th></tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <section id="tab-backtest" class="tab">
+      <div class="card">
+        <h2>Backtest chamber</h2>
+        <p class="muted">Replays the 15-minute crypto model on recently settled markets using Kalshi's 1-minute candles and Coinbase spot, across 45 settings (entry time × minimum edge × volatility scale).</p>
+        <form id="btform" class="row">
+          <select name="asset"><option>BTC</option><option>ETH</option><option>SOL</option><option>XRP</option><option>DOGE</option></select>
+          <input name="markets" type="number" min="4" max="60" value="30">
+          <button class="btn">Run backtest</button>
+        </form>
+        <div id="btout"></div>
+      </div>
+    </section>
+
+    <section id="tab-connect" class="tab">
+      <div class="card">
+        <h2>Connect an agent over MCP</h2>
+        <p>Any MCP client can join the crew. Each connection is one agent with its own name; its tool calls appear in the hub as they happen.</p>
+        <h3>Claude Code</h3>
+        <pre>claude mcp add council-line-shark -- kalshi-council mcp --agent line-shark --name "Line Shark" --model claude-code</pre>
+        <h3>Any client (.mcp.json)</h3>
+        <pre>kalshi-council mcp-config &gt; .mcp.json</pre>
+        <h3>Plain HTTP</h3>
+        <pre>curl -X POST localhost:8787/api/tools/discover_markets \
+  -H 'content-type: application/json' \
+  -d '{"agent":"my-bot","args":{"category":"Sports","limit":5}}'</pre>
+        <h3>Built-in crew</h3>
+        <pre>ANTHROPIC_API_KEY=... kalshi-council run --crew</pre>
+        <p class="muted">Agents can research and forecast. They can't place orders: only the council's vote, plus the risk limits, can open a position.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="drawer" class="drawer hidden">
+  <div class="drawer-inner card">
+    <button class="close" id="drawer-close" aria-label="Close">×</button>
+    <div id="drawer-body"></div>
+  </div>
+</div>
+
+<script src="/static/ship.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

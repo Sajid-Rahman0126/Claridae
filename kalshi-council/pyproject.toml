@@ -1,0 +1,35 @@
+[project]
+name = "kalshi-council"
+version = "0.1.0"
+description = "AI agents forecast Kalshi markets over MCP, a council votes, a bot crew trades — paper by default."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "httpx>=0.27",
+    "cryptography>=42",
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+    "mcp>=2.0",
+]
+
+[project.optional-dependencies]
+agents = ["anthropic>=1.0"]
+dev = ["pytest>=8", "pytest-asyncio>=0.23"]
+
+[project.scripts]
+kalshi-council = "kalshi_council.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["kalshi_council*"]
+
+[tool.setuptools.package-data]
+kalshi_council = ["web/*", "personas.json"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
