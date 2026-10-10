@@ -49,11 +49,31 @@ cap, a maximum number of open positions, and a daily loss stop. The bankroll is 
 
 ## Quick start
 
+Needs Python 3.11 or newer and git.
+
+**macOS / Linux**
+
 ```bash
-cd kalshi-council
-pip install -e ".[agents,dev]"
-kalshi-council run                 # http://127.0.0.1:8787 — paper trading, live data
+git clone -b claude/kalshi-agent-council https://github.com/Sajid-Rahman0126/Claridae.git
+cd Claridae/kalshi-council
+./setup.sh --start                 # virtualenv + install + .env, then opens on http://127.0.0.1:8787
 ```
+
+Later runs: `cd Claridae/kalshi-council && .venv/bin/kalshi-council run`.
+
+**Windows (PowerShell)**
+
+```powershell
+git clone -b claude/kalshi-agent-council https://github.com/Sajid-Rahman0126/Claridae.git
+cd Claridae\kalshi-council
+py -3 -m venv .venv
+.venv\Scripts\python -m pip install -e ".[agents]"
+copy .env.example .env
+.venv\Scripts\kalshi-council run   # http://127.0.0.1:8787
+```
+
+Paper trading is the default: the dashboard uses live Kalshi data, but no order reaches the
+exchange until you change `.env` (see [Live trading](#live-trading)).
 
 ### Plug in agents over MCP
 
