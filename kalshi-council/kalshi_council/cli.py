@@ -35,6 +35,12 @@ def cmd_mcp(args: argparse.Namespace) -> None:
     run(args.engine_url, args.agent, args.name, args.model, args.persona)
 
 
+def cmd_claude(args: argparse.Namespace) -> None:
+    from .launcher import run
+
+    sys.exit(run(args.agent, args.engine_url, personas_path=args.personas, prompt=args.prompt))
+
+
 def cmd_backtest(args: argparse.Namespace) -> None:
     from .backtest import backtest_crypto15m
     from .config import PROD_BASE
@@ -85,6 +91,14 @@ def main(argv: list[str] | None = None) -> None:
     m.add_argument("--persona", default="")
     m.add_argument("--engine-url", default="http://127.0.0.1:8787")
     m.set_defaults(fn=cmd_mcp)
+
+    cl = sub.add_parser("claude", help="open Claude Code as one council agent (uses your Claude subscription)")
+    cl.add_argument("agent", help="persona id (barometer, line-shark, dot-plot, pollster, contrarian, "
+                                  "tape-reader) or any name for a generalist")
+    cl.add_argument("prompt", nargs="?", default=None, help="what to ask it (default: run a forecasting session)")
+    cl.add_argument("--engine-url", default="http://127.0.0.1:8787")
+    cl.add_argument("--personas", default=None)
+    cl.set_defaults(fn=cmd_claude)
 
     b = sub.add_parser("backtest", help="backtest the 15-minute crypto model")
     b.add_argument("--asset", default="BTC")

@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 import anthropic
 
 from .engine import Engine
-from .personas import Persona
+from .personas import Persona, forecaster_prompt
 from .tools import TOOLS, ToolError, call_tool
 
 log = logging.getLogger("kalshi_council.crew")
@@ -24,26 +24,6 @@ log = logging.getLogger("kalshi_council.crew")
 CREW_TOOLS = ("discover_markets", "get_market", "get_orderbook", "get_recent_trades", "get_spot_price",
               "submit_forecast", "get_council", "get_leaderboard")
 WEB_SEARCH = {"type": "web_search_20260209", "name": "web_search", "max_uses": 6}
-
-
-def system_prompt(p: Persona) -> str:
-    beat = ", ".join(p.categories) if p.categories else "any category"
-    return f"""You are {p.name}, one of several AI forecasters on the Kalshi Council. {p.style}
-
-Your beat: {beat}.
-
-Each session, find three to six open markets on your beat where you can form a real view. Use
-discover_markets to browse, get_market to read the resolution rules, and web search for current
-information. Then call submit_forecast for each with a calibrated probability, a confidence, and a
-one-to-three sentence rationale naming the evidence.
-
-How you are judged: when a market settles, your forecast gets a Brier score and so does the market
-price at the moment you forecast. Your weight on the council grows only if you beat the price. The
-council trades when enough agents agree there is edge after fees, so a confident wrong forecast
-costs real money. If you agree with the price, skip the market or forecast near it with low
-confidence. Prefer markets that settle within two weeks so your record builds quickly.
-
-End the session with two or three sentences on what you forecast and why."""
 
 
 def session_brief(engine: Engine, p: Persona) -> str:
@@ -87,7 +67,7 @@ class Crew:
             response = await self.client.beta.messages.create(
                 model=self.model,
                 max_tokens=16000,
-                system=system_prompt(p),
+                system=forecaster_prompt(p),
                 tools=self.tools(),
                 messages=messages,
                 output_config={"effort": "medium"},

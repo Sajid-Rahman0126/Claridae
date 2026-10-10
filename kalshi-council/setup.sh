@@ -34,10 +34,12 @@ Start the dashboard:
   cd "$DIR" && .venv/bin/kalshi-council run
   then open http://127.0.0.1:8787
 
-Add an agent to Claude Code (run while the dashboard is up):
-  claude mcp add council-line-shark -- "$DIR/.venv/bin/kalshi-council" mcp --agent line-shark --name "Line Shark"
+Open Claude Code as a council agent (uses your Claude Pro/Max plan; run while the dashboard is up):
+  cd "$DIR" && .venv/bin/kalshi-council claude line-shark
+  The council trades when 2 agents agree: run a second one (e.g. dot-plot) in another terminal,
+  or set KC_COUNCIL_QUORUM=1 in .env.
 
-Run the built-in Claude crew (uses API credits):
+Run the built-in Claude crew instead (Anthropic API, billed separately from a subscription):
   export ANTHROPIC_API_KEY=...   # or: ant auth login
   cd "$DIR" && .venv/bin/kalshi-council run --crew dot-plot
 

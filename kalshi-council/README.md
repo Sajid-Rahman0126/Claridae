@@ -75,16 +75,35 @@ copy .env.example .env
 Paper trading is the default: the dashboard uses live Kalshi data, but no order reaches the
 exchange until you change `.env` (see [Live trading](#live-trading)).
 
-### Plug in agents over MCP
+### Plug in Claude Code (uses your Claude subscription)
 
-Each MCP connection is one crew member. In Claude Code:
+Claude Code with a Pro or Max plan can be a council agent with no API key. Install it and sign in
+once (`curl -fsSL https://claude.ai/install.sh | bash` on macOS/Linux,
+`irm https://claude.ai/install.ps1 | iex` in Windows PowerShell, then run `claude`). Then, with
+the dashboard running in another terminal:
+
+```bash
+kalshi-council claude line-shark          # opens Claude Code as Line Shark
+kalshi-council claude dot-plot "Forecast this month's CPI markets"
+```
+
+Each launch is one crew member. It gets only that agent's council tools (no permission prompt for
+them), the persona's beat and standing instructions, and starts a forecasting session. Any other
+name, e.g. `kalshi-council claude my-bot`, makes a generalist.
+
+The council needs two agents agreeing before it trades (`KC_COUNCIL_QUORUM=2`). Run two personas
+in two terminals, or set `KC_COUNCIL_QUORUM=1` in `.env` to let a single agent's forecasts trade
+(paper by default). Every session counts against your plan's usage limits.
+
+### Other MCP clients
+
+Each MCP connection is one crew member. Add one to Claude Code permanently:
 
 ```bash
 claude mcp add council-line-shark -- kalshi-council mcp --agent line-shark --name "Line Shark"
 ```
 
-Then ask it something like *"Find Sports markets closing this week where you have a view and
-submit forecasts."* Or generate a config with one agent per persona for any MCP client:
+Or generate a config with one agent per persona for any MCP client (Codex, Cursor, ...):
 
 ```bash
 kalshi-council mcp-config > .mcp.json
@@ -98,6 +117,9 @@ curl -X POST localhost:8787/api/tools/submit_forecast -H 'content-type: applicat
 ```
 
 ### Run the built-in Claude crew
+
+This mode calls the Anthropic API directly, which is billed separately from a Claude Pro or Max
+subscription. To use your subscription instead, use `kalshi-council claude` above.
 
 ```bash
 export ANTHROPIC_API_KEY=...       # or `ant auth login`
@@ -183,7 +205,8 @@ kalshi_council/
   engine.py        scan / council / settle loops, event publishing
   tools.py         the agent tool registry (shared by MCP, REST and the crew)
   mcp_server.py    stdio MCP server, one per agent
-  agent_runner.py  built-in Claude crew
+  agent_runner.py  built-in Claude crew (Anthropic API)
+  launcher.py      `kalshi-council claude`: Claude Code as one agent
   backtest.py      15-minute model backtest
   server.py        FastAPI: REST, SSE, UI
   web/             Agent Hub (canvas ship, council, signals, positions, backtest)
